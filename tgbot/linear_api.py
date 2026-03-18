@@ -137,8 +137,8 @@ def upload_attachment(issue_id: str, filename: str, data: bytes) -> dict:
     """
     # Step 1: Get presigned upload URL
     upload_mutation = """
-    mutation FileUpload($filename: String!, $contentType: String!) {
-        fileUpload(filename: $filename, contentType: $contentType) {
+    mutation FileUpload($filename: String!, $contentType: String!, $size: Int!) {
+        fileUpload(filename: $filename, contentType: $contentType, size: $size) {
             success
             uploadFile {
                 uploadUrl
@@ -155,6 +155,7 @@ def upload_attachment(issue_id: str, filename: str, data: bytes) -> dict:
     upload_data = _graphql(upload_mutation, {
         "filename": filename,
         "contentType": content_type,
+        "size": len(data),
     })
     upload_file = upload_data["fileUpload"]["uploadFile"]
     upload_url = upload_file["uploadUrl"]

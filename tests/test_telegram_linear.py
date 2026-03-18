@@ -155,6 +155,7 @@ class TestUploadAttachment:
         first_call_variables = mock_gql.call_args_list[0][0][1]
         assert first_call_variables["filename"] == filename
         assert first_call_variables["contentType"] == "image/jpeg"
+        assert first_call_variables["size"] == len(file_data)
 
         # Step 2: PUT to the upload URL with correct headers
         put_call = mock_put.call_args
