@@ -1,0 +1,30 @@
+{
+  "issues": [
+    {
+      "id": "happy-1",
+      "title": "Nissan Leaf fluid appears low",
+      "state": "backlog",
+      "description": "Clear reservoir is below min line.",
+      "labels": [
+        "type-maintenance"
+      ],
+      "attachments": [
+        {
+          "id": "attachment-1",
+          "url": "https://cdn.example.com/reservoir.jpg",
+          "title": "reservoir.jpg",
+          "metadata": {
+            "mimeType": "image/jpeg"
+          }
+        }
+      ],
+      "comments": [
+        {
+          "body": "<!-- triage-result -->\nLikely windshield washer fluid.",
+          "createdAt": "2026-03-01T08:00:00Z"
+        }
+      ],
+      "children": []
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "issues": [
+    {
+      "id": "parent-2",
+      "title": "Maintenance orchestration issue",
+      "state": "planning_complete",
+      "description": "Parent issue for mixed child states.",
+      "labels": [],
+      "attachments": [],
+      "comments": [
+        {
+          "body": "<!-- breakdown-result -->\nCreated 3 child issues."
+        }
+      ],
+      "children": [
+        {
+          "id": "child-1",
+          "title": "Research steps",
+          "state": "in_progress",
+          "labels": [
+            "agent-task"
+          ],
+          "sortOrder": 1.0
+        },
+        {
+          "id": "child-2",
+          "title": "Order supplies",
+          "state": "todo",
+          "labels": [
+            "human-task"
+          ],
+          "sortOrder": 2.0
+        },
+        {
+          "id": "child-3",
+          "title": "Post summary",
+          "state": "backlog",
+          "labels": [
+            "agent-task"
+          ],
+          "sortOrder": 3.0
+        }
+      ]
+    }
+  ]
+}

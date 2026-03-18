@@ -1,0 +1,25 @@
+# Environment (contains API keys)
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs and data (these live in Docker volumes)
+*.log
+cost_tracker.json
+
+# Lock files
+*.lock
+!requirements*.txt

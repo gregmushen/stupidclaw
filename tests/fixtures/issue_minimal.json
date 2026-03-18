@@ -1,0 +1,14 @@
+{
+  "issues": [
+    {
+      "id": "minimal-1",
+      "title": "Test issue",
+      "state": "backlog",
+      "description": "",
+      "labels": [],
+      "attachments": [],
+      "comments": [],
+      "children": []
+    }
+  ]
+}
