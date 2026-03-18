@@ -205,6 +205,19 @@ Core categories:
 - Labels: `LABEL_*`
 - Budgeting: `DAILY_BUDGET_CAP`, `PER_TASK_TOKEN_CAP`, `COST_TRACKER_PATH`
 - Runtime: `LOCKFILE_PATH`, `STALE_BLOCKED_HOURS`, `CLAUDE_MODEL`
+- Telegram: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TELEGRAM_NOTIFY_PORT`, `TELEGRAM_NOTIFY_HOST_PORT`, `TELEGRAM_BOT_URL`
+
+### Telegram Port + Cloudflare Tunnel
+
+- `TELEGRAM_NOTIFY_PORT` controls the port **inside** the `telegram-bot` container (default `8080`).
+- `TELEGRAM_NOTIFY_HOST_PORT` controls the port on the **host** (Garageband) that maps to container `8080`.
+- Recommended Garageband setting:
+  - `TELEGRAM_NOTIFY_HOST_PORT=38080`
+
+Cloudflare Tunnel route for Telegram notify endpoint:
+
+- Public hostname: e.g. `stupidclaw-bot.getmyhomestead.com`
+- Service (origin): `http://localhost:38080`
 
 ## Marker Comments
 

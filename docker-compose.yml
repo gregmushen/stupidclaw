@@ -19,7 +19,7 @@ services:
     restart: unless-stopped
     env_file: .env
     ports:
-      - "8080:8080"
+      - "${TELEGRAM_NOTIFY_HOST_PORT:-8080}:8080"
 
 volumes:
   stupidclaw-data:
