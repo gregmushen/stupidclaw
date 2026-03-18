@@ -3,12 +3,13 @@ import os
 import re
 from typing import Any
 
-from shared.claude_client import call_claude
+from shared.claude_client import build_user_message, call_claude
 from shared.comment_markers import (
     get_all_marker_contents,
     write_marker_comment,
 )
 from shared.config import get_labels, get_states
+from shared.image_handler import download_attachments
 from shared.linear_client import graphql
 from shared.logging_config import setup_logging
 
@@ -196,6 +197,7 @@ def _get_parent_with_children(parent_id: str) -> dict:
             identifier
             title
             description
+            attachments { nodes { id title url metadata } }
             state { id name }
             comments { nodes { id body createdAt user { id name isMe } } }
             children {
@@ -204,6 +206,7 @@ def _get_parent_with_children(parent_id: str) -> dict:
                 identifier
                 title
                 description
+                attachments { nodes { id title url metadata } }
                 sortOrder
                 state { id name }
                 labels { nodes { id name } }
@@ -253,7 +256,11 @@ def run(max_iterations: int = 1) -> int:
                     sibling_results.append(notes[-1].split("\n", 1)[-1])
 
             user_text = build_research_input(parent_issue, task, sibling_results)
-            response = call_claude(system=prompt, messages=[{"role": "user", "content": user_text}])
+            images = download_attachments(parent_issue.get("attachments", {}).get("nodes", []))
+            response = call_claude(
+                system=prompt,
+                messages=[build_user_message(user_text, images=images)],
+            )
             parsed = parse_research_response(response.content[0].text)
 
             if parsed["result"] == "completed":
