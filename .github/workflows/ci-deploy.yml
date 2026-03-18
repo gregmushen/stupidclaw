@@ -64,7 +64,12 @@ jobs:
         run: |
           set -euo pipefail
           TUNNEL_PORT=2222
-          cloudflared access tcp --hostname "${SSH_HOST}" --url "localhost:${TUNNEL_PORT}" >/tmp/cloudflared.log 2>&1 &
+          cloudflared access tcp \
+            --hostname "${SSH_HOST}" \
+            --url "localhost:${TUNNEL_PORT}" \
+            --service-token-id "${CF_ACCESS_CLIENT_ID}" \
+            --service-token-secret "${CF_ACCESS_CLIENT_SECRET}" \
+            >/tmp/cloudflared.log 2>&1 &
           CF_PID=$!
           trap 'kill ${CF_PID} >/dev/null 2>&1 || true' EXIT
 
