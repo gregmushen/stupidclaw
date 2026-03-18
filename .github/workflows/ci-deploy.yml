@@ -55,7 +55,7 @@ jobs:
         run: |
           set -euo pipefail
           PORT="${SSH_PORT:-22}"
-          ssh -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new -p "$PORT" "${SSH_USER}@${SSH_HOST}" "set -euo pipefail; \
+          ssh -4 -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new -p "$PORT" "${SSH_USER}@${SSH_HOST}" "set -euo pipefail; \
             if [ ! -d '${DEPLOY_PATH}/.git' ]; then \
               mkdir -p '${DEPLOY_PATH}'; \
               git clone '${REPO_URL}' '${DEPLOY_PATH}'; \
