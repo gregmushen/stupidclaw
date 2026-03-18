@@ -46,6 +46,9 @@ LINEAR_API_URL = "https://api.linear.app/graphql"
 def get_linear_api_key() -> str:
     return _env("LINEAR_API_KEY")
 
+def get_linear_team_id() -> str:
+    return _env("LINEAR_TEAM_ID")
+
 def get_anthropic_api_key() -> str:
     return _env("ANTHROPIC_API_KEY")
 

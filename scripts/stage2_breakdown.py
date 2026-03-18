@@ -5,7 +5,7 @@ from typing import Any
 
 from shared.claude_client import call_claude
 from shared.comment_markers import write_marker_comment
-from shared.config import get_labels, get_states
+from shared.config import get_labels, get_linear_team_id, get_states
 from shared.linear_client import graphql
 from shared.logging_config import setup_logging
 
@@ -84,7 +84,13 @@ def _list_triaged_issues(state_id: str) -> list[dict]:
     return data["issues"]["nodes"]
 
 
-def _create_subtasks(parent_issue: dict, tasks: list[dict[str, str]], labels: dict, states: dict) -> None:
+def _create_subtasks(
+    parent_issue: dict,
+    tasks: list[dict[str, str]],
+    labels: dict,
+    states: dict,
+    team_id: str,
+) -> None:
     first_agent_started = False
     for index, task in enumerate(tasks, start=1):
         label_id = labels["agent_task"] if task["type"] == "agent" else labels["human_task"]
@@ -98,6 +104,7 @@ def _create_subtasks(parent_issue: dict, tasks: list[dict[str, str]], labels: di
             mutation(
               $title: String!,
               $description: String!,
+              $teamId: String!,
               $parentId: String!,
               $labelIds: [String!],
               $sortOrder: Float!,
@@ -107,6 +114,7 @@ def _create_subtasks(parent_issue: dict, tasks: list[dict[str, str]], labels: di
                 input: {
                   title: $title,
                   description: $description,
+                  teamId: $teamId,
                   parentId: $parentId,
                   labelIds: $labelIds,
                   sortOrder: $sortOrder,
@@ -121,6 +129,7 @@ def _create_subtasks(parent_issue: dict, tasks: list[dict[str, str]], labels: di
             {
                 "title": task["title"],
                 "description": task["description"],
+                "teamId": team_id,
                 "parentId": parent_issue["id"],
                 "labelIds": [label_id],
                 "sortOrder": float(index),
@@ -133,6 +142,7 @@ def run(max_iterations: int = 1) -> int:
     logger = setup_logging()
     states = get_states()
     labels = get_labels()
+    team_id = get_linear_team_id()
     prompt = _load_prompt()
 
     processed = 0
@@ -144,7 +154,7 @@ def run(max_iterations: int = 1) -> int:
             user_input = f"Title: {issue.get('title', '')}\n\nDescription:\n{issue.get('description', '')}"
             response = call_claude(system=prompt, messages=[{"role": "user", "content": user_input}])
             tasks = parse_breakdown_response(response.content[0].text)
-            _create_subtasks(issue, tasks, labels, states)
+            _create_subtasks(issue, tasks, labels, states, team_id)
             graphql(
                 """
                 mutation($issueId: String!, $stateId: String!) {

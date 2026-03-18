@@ -45,6 +45,7 @@ def minimal_env(monkeypatch):
         monkeypatch.setenv(f"LABEL_{name}", f"label-{name.lower()}")
 
     monkeypatch.setenv("LINEAR_API_KEY", "lin_api_test")
+    monkeypatch.setenv("LINEAR_TEAM_ID", "team-stu-test")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
 
 
