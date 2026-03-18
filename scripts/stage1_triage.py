@@ -124,7 +124,7 @@ def _load_prompt() -> str:
 def _list_backlog_issues(state_id: str) -> list[dict]:
     data = graphql(
         """
-        query($stateId: String!) {
+        query($stateId: ID!) {
           issues(filter: { state: { id: { eq: $stateId } } }) {
             nodes {
               id
@@ -146,7 +146,7 @@ def _list_backlog_issues(state_id: str) -> list[dict]:
 def _list_blocked_issues(state_id: str) -> list[dict]:
     data = graphql(
         """
-        query($stateId: String!) {
+        query($stateId: ID!) {
           issues(filter: { state: { id: { eq: $stateId } } }) {
             nodes {
               id
@@ -174,7 +174,7 @@ def _requeue_blocked_issues(states: dict, logger) -> int:
             continue
         graphql(
             """
-            mutation($issueId: String!, $stateId: String!) {
+            mutation($issueId: ID!, $stateId: ID!) {
               issueUpdate(id: $issueId, input: { stateId: $stateId }) { success }
             }
             """,
@@ -196,7 +196,7 @@ def _apply_triage(issue: dict, triage: dict, states: dict, labels: dict) -> None
     if triage["blocked"]:
         graphql(
             """
-            mutation($issueId: String!, $stateId: String!, $labelIds: [String!]) {
+            mutation($issueId: ID!, $stateId: ID!, $labelIds: [ID!]) {
               issueUpdate(id: $issueId, input: { stateId: $stateId, labelIds: $labelIds }) { success }
             }
             """,
@@ -221,7 +221,7 @@ def _apply_triage(issue: dict, triage: dict, states: dict, labels: dict) -> None
 
     graphql(
         """
-        mutation($issueId: String!, $stateId: String!, $labelIds: [String!]) {
+        mutation($issueId: ID!, $stateId: ID!, $labelIds: [ID!]) {
           issueUpdate(id: $issueId, input: { stateId: $stateId, labelIds: $labelIds }) { success }
         }
         """,

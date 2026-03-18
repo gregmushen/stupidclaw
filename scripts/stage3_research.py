@@ -166,7 +166,7 @@ def _load_prompt() -> str:
 def _list_active_agent_subtasks(state_id: str, agent_label_id: str) -> list[dict]:
     data = graphql(
         """
-        query($stateId: String!, $labelId: String!) {
+        query($stateId: ID!, $labelId: ID!) {
           issues(filter: { state: { id: { eq: $stateId } }, labels: { id: { eq: $labelId } } }) {
             nodes {
               id
@@ -190,7 +190,7 @@ def _list_active_agent_subtasks(state_id: str, agent_label_id: str) -> list[dict
 def _get_parent_with_children(parent_id: str) -> dict:
     data = graphql(
         """
-        query($id: String!) {
+        query($id: ID!) {
           issue(id: $id) {
             id
             identifier
@@ -259,7 +259,7 @@ def run(max_iterations: int = 1) -> int:
             if parsed["result"] == "completed":
                 graphql(
                     """
-                    mutation($issueId: String!, $stateId: String!) {
+                    mutation($issueId: ID!, $stateId: ID!) {
                       issueUpdate(id: $issueId, input: { stateId: $stateId }) { success }
                     }
                     """,
@@ -274,7 +274,7 @@ def run(max_iterations: int = 1) -> int:
                 if next_sibling:
                     graphql(
                         """
-                        mutation($issueId: String!, $stateId: String!) {
+                        mutation($issueId: ID!, $stateId: ID!) {
                           issueUpdate(id: $issueId, input: { stateId: $stateId }) { success }
                         }
                         """,
@@ -285,7 +285,7 @@ def run(max_iterations: int = 1) -> int:
                     parent_state_key = determine_parent_state(refreshed_children)
                     graphql(
                         """
-                        mutation($issueId: String!, $stateId: String!) {
+                        mutation($issueId: ID!, $stateId: ID!) {
                           issueUpdate(id: $issueId, input: { stateId: $stateId }) { success }
                         }
                         """,
@@ -321,7 +321,7 @@ def run(max_iterations: int = 1) -> int:
 
                 graphql(
                     """
-                    mutation($issueId: String!, $stateId: String!, $labelIds: [String!]) {
+                    mutation($issueId: ID!, $stateId: ID!, $labelIds: [ID!]) {
                       issueUpdate(id: $issueId, input: { stateId: $stateId, labelIds: $labelIds }) { success }
                     }
                     """,

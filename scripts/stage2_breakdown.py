@@ -67,7 +67,7 @@ def _load_prompt() -> str:
 def _list_triaged_issues(state_id: str) -> list[dict]:
     data = graphql(
         """
-        query($stateId: String!) {
+        query($stateId: ID!) {
           issues(filter: { state: { id: { eq: $stateId } } }) {
             nodes {
               id
@@ -98,10 +98,10 @@ def _create_subtasks(parent_issue: dict, tasks: list[dict[str, str]], labels: di
             mutation(
               $title: String!,
               $description: String!,
-              $parentId: String!,
-              $labelIds: [String!],
+              $parentId: ID!,
+              $labelIds: [ID!],
               $sortOrder: Float!,
-              $stateId: String!
+              $stateId: ID!
             ) {
               issueCreate(
                 input: {
@@ -147,7 +147,7 @@ def run(max_iterations: int = 1) -> int:
             _create_subtasks(issue, tasks, labels, states)
             graphql(
                 """
-                mutation($issueId: String!, $stateId: String!) {
+                mutation($issueId: ID!, $stateId: ID!) {
                   issueUpdate(id: $issueId, input: { stateId: $stateId }) { success }
                 }
                 """,
