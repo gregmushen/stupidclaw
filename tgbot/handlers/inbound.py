@@ -20,6 +20,13 @@ _media_group_buffer: dict[str, list] = {}
 _media_group_tasks: dict[str, asyncio.Task] = {}
 
 
+def _build_title_and_description(text: str, default_title: str = "Photo task") -> tuple[str, str]:
+    raw = (text or "").strip()
+    if not raw:
+        return default_title, default_title
+    return raw[:200], raw
+
+
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle incoming text messages — create a Linear issue."""
     if update.effective_chat.id != int(get_chat_id()):
@@ -29,8 +36,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     if not text:
         return
 
-    title = text[:200]
-    description = text if len(text) > 200 else ""
+    title, description = _build_title_and_description(text, default_title="Task")
 
     result = create_issue(title=title, description=description)
     identifier = result["identifier"]
@@ -69,8 +75,7 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             )
     else:
         # Single photo — process immediately
-        title = caption[:200] if caption else "Photo task"
-        description = caption if len(caption) > 200 else ""
+        title, description = _build_title_and_description(caption, default_title="Photo task")
 
         result = create_issue(
             title=title,
@@ -95,8 +100,7 @@ async def _flush_media_group(group_id: str, chat_id: int, bot) -> None:
         return
 
     caption = next((p["caption"] for p in photos if p["caption"]), "")
-    title = caption[:200] if caption else "Photo task"
-    description = caption if len(caption) > 200 else ""
+    title, description = _build_title_and_description(caption, default_title="Photo task")
 
     attachments = [
         {"filename": f"photo_{i+1}.jpg", "data": p["data"]}

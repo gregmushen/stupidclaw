@@ -43,6 +43,29 @@ class TestCreateIssue:
         assert variables["input"]["teamId"] == team_id
         assert variables["input"]["title"] == "Check this out"
 
+    def test_create_issue_falls_back_description_to_title(self):
+        """If description is blank, create_issue should use title as description."""
+        team_id = "team-uuid-123"
+        mock_response = {
+            "issueCreate": {
+                "success": True,
+                "issue": {
+                    "id": "issue-uuid-abc",
+                    "identifier": "STU-42",
+                },
+            }
+        }
+
+        with patch.dict(os.environ, {"LINEAR_API_KEY": "lin_test_key", "LINEAR_TEAM_ID": team_id}):
+            with patch("tgbot.linear_api._graphql", return_value=mock_response) as mock_gql:
+                from tgbot.linear_api import create_issue
+
+                create_issue(title="Short title", description="")
+
+        variables = mock_gql.call_args[0][1]
+        assert variables["input"]["title"] == "Short title"
+        assert variables["input"]["description"] == "Short title"
+
 
 class TestUploadAttachment:
 

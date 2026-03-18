@@ -86,11 +86,14 @@ def create_issue(
     }
     """
 
+    safe_title = (title or "").strip() or "Task"
+    safe_description = (description or "").strip() or safe_title
+
     variables = {
         "input": {
             "teamId": get_linear_team_id(),
-            "title": title,
-            "description": description,
+            "title": safe_title,
+            "description": safe_description,
         }
     }
 

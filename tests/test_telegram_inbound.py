@@ -53,7 +53,7 @@ class TestTextHandler:
                 from tgbot.handlers.inbound import handle_text
                 await handle_text(update, context)
 
-        mock_create.assert_called_once_with(title="Fix the garage door", description="")
+        mock_create.assert_called_once_with(title="Fix the garage door", description="Fix the garage door")
         update.message.reply_text.assert_called_once_with("Created STU-10: Fix the garage door")
 
     @pytest.mark.asyncio
@@ -125,6 +125,7 @@ class TestPhotoHandler:
         mock_create.assert_called_once()
         call_kwargs = mock_create.call_args[1]
         assert call_kwargs["title"] == "Check this crack"
+        assert call_kwargs["description"] == "Check this crack"
         assert len(call_kwargs["attachments"]) == 1
 
         reply_text = update.message.reply_text.call_args[0][0]
@@ -170,6 +171,7 @@ class TestPhotoHandler:
         call_kwargs = mock_create.call_args[1]
         assert len(call_kwargs["attachments"]) == 3
         assert call_kwargs["title"] == "Album caption"
+        assert call_kwargs["description"] == "Album caption"
 
         # Bot.send_message was used (not update.message.reply_text) for grouped photos
         bot.send_message.assert_called_once()
