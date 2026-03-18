@@ -153,6 +153,25 @@ docker compose run --rm stupidclaw python scripts/run_pipeline.py
 
 Cron schedule is defined in [`crontab`](crontab) (`*/5 * * * *`).
 
+## GitHub Actions (CI/CD)
+
+This repo includes [`.github/workflows/ci-deploy.yml`](.github/workflows/ci-deploy.yml):
+
+- On every push and pull request:
+  - runs full test suite: `pytest tests/ -v`
+- On push to `master` (only after tests pass):
+  - deploys to your Garageband server over SSH
+  - pulls latest `master`
+  - runs `docker compose up -d --build`
+
+Required GitHub repository secrets:
+
+- `GARAGEBAND_HOST`
+- `GARAGEBAND_USER`
+- `GARAGEBAND_SSH_KEY`
+- `GARAGEBAND_DEPLOY_PATH`
+- `GARAGEBAND_SSH_PORT` (optional, defaults to `22`)
+
 ## Testing
 
 Run all tests:
@@ -221,4 +240,3 @@ Used to make stage output idempotent and queryable in Linear comments:
 2. Run `pytest -q`.
 3. Run local pipeline smoke (`python scripts/run_pipeline.py`) or Docker smoke.
 4. Update Linear statuses only after passing verification.
-
