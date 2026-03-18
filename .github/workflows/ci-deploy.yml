@@ -30,7 +30,7 @@ jobs:
   deploy:
     name: Deploy to Garageband Server
     needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Configure SSH
@@ -64,7 +64,11 @@ jobs:
               git clone '${REPO_URL}' '${DEPLOY_PATH}'; \
             fi; \
             cd '${DEPLOY_PATH}'; \
-            git fetch origin master; \
-            git checkout master; \
-            git reset --hard origin/master; \
-            docker compose up -d --build"
+            git fetch origin main; \
+            git checkout main; \
+            git reset --hard origin/main; \
+            if command -v docker-compose >/dev/null 2>&1; then \
+              docker-compose up -d --build; \
+            else \
+              docker compose up -d --build; \
+            fi"

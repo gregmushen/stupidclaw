@@ -159,7 +159,7 @@ This repo includes [`.github/workflows/ci-deploy.yml`](.github/workflows/ci-depl
 
 - On every push and pull request:
   - runs full test suite: `pytest tests/ -v`
-- On push to `master` (only after tests pass):
+- On push to `main` (only after tests pass):
   - deploys to your Garageband server over SSH
   - pulls latest `master`
   - runs `docker compose up -d --build`
