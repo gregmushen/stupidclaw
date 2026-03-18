@@ -46,7 +46,6 @@ jobs:
           chmod 644 ~/.ssh/known_hosts
 
       - name: Install cloudflared
-        if: ${{ secrets.CF_ACCESS_CLIENT_ID != '' && secrets.CF_ACCESS_CLIENT_SECRET != '' }}
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.local/bin"
@@ -55,7 +54,6 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Deploy via Cloudflare Access
-        if: ${{ secrets.CF_ACCESS_CLIENT_ID != '' && secrets.CF_ACCESS_CLIENT_SECRET != '' }}
         env:
           SSH_HOST: ${{ secrets.GARAGEBAND_HOST }}
           SSH_USER: ${{ secrets.GARAGEBAND_USER }}
@@ -66,32 +64,6 @@ jobs:
         run: |
           set -euo pipefail
           ssh -o ProxyCommand="cloudflared access ssh --hostname %h" -o ConnectTimeout=30 -o StrictHostKeyChecking=accept-new "${SSH_USER}@${SSH_HOST}" "set -euo pipefail; \
-            if [ ! -d '${DEPLOY_PATH}/.git' ]; then \
-              mkdir -p '${DEPLOY_PATH}'; \
-              git clone '${REPO_URL}' '${DEPLOY_PATH}'; \
-            fi; \
-            cd '${DEPLOY_PATH}'; \
-            git fetch origin main; \
-            git checkout main; \
-            git reset --hard origin/main; \
-            if command -v docker-compose >/dev/null 2>&1; then \
-              docker-compose up -d --build; \
-            else \
-              docker compose up -d --build; \
-            fi"
-
-      - name: Deploy via direct SSH fallback
-        if: ${{ secrets.CF_ACCESS_CLIENT_ID == '' || secrets.CF_ACCESS_CLIENT_SECRET == '' }}
-        env:
-          SSH_HOST: ${{ secrets.GARAGEBAND_HOST }}
-          SSH_PORT: ${{ secrets.GARAGEBAND_SSH_PORT }}
-          SSH_USER: ${{ secrets.GARAGEBAND_USER }}
-          DEPLOY_PATH: ${{ secrets.GARAGEBAND_DEPLOY_PATH }}
-          REPO_URL: https://github.com/${{ github.repository }}.git
-        run: |
-          set -euo pipefail
-          PORT="${SSH_PORT:-22}"
-          ssh -4 -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new -p "$PORT" "${SSH_USER}@${SSH_HOST}" "set -euo pipefail; \
             if [ ! -d '${DEPLOY_PATH}/.git' ]; then \
               mkdir -p '${DEPLOY_PATH}'; \
               git clone '${REPO_URL}' '${DEPLOY_PATH}'; \
