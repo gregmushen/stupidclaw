@@ -63,18 +63,6 @@ jobs:
           CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
         run: |
           set -euo pipefail
-          EXPECTED_CF_ID_SHA="4e4bde08caf0c524dfc0f70ce61bcaff732d1cbd78654e741228b5f29a725fef"
-          EXPECTED_CF_SECRET_SHA="b820470bd5fd2647ab011ddd35d2de9a0a900a39771fbe390dd2a82791655009"
-          ACTUAL_CF_ID_SHA="$(printf '%s' "${CF_ACCESS_CLIENT_ID}" | sha256sum | awk '{print $1}')"
-          ACTUAL_CF_SECRET_SHA="$(printf '%s' "${CF_ACCESS_CLIENT_SECRET}" | sha256sum | awk '{print $1}')"
-          echo "CF_ID_SHA=${ACTUAL_CF_ID_SHA}"
-          echo "CF_SECRET_SHA=${ACTUAL_CF_SECRET_SHA}"
-
-          if [ "${ACTUAL_CF_ID_SHA}" != "${EXPECTED_CF_ID_SHA}" ] || [ "${ACTUAL_CF_SECRET_SHA}" != "${EXPECTED_CF_SECRET_SHA}" ]; then
-            echo "Cloudflare secret hash mismatch in GitHub Actions."
-            exit 1
-          fi
-
           TUNNEL_PORT=2222
           cloudflared access tcp \
             --hostname "${SSH_HOST}" \
