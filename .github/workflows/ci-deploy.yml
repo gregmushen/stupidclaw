@@ -63,7 +63,26 @@ jobs:
           CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
         run: |
           set -euo pipefail
-          ssh -o ProxyCommand="cloudflared access ssh --hostname %h" -o ConnectTimeout=30 -o StrictHostKeyChecking=accept-new "${SSH_USER}@${SSH_HOST}" "set -euo pipefail; \
+          TUNNEL_PORT=2222
+          cloudflared access tcp --hostname "${SSH_HOST}" --url "localhost:${TUNNEL_PORT}" >/tmp/cloudflared.log 2>&1 &
+          CF_PID=$!
+          trap 'kill ${CF_PID} >/dev/null 2>&1 || true' EXIT
+
+          for i in $(seq 1 20); do
+            if bash -c ">/dev/tcp/127.0.0.1/${TUNNEL_PORT}" >/dev/null 2>&1; then
+              READY=1
+              break
+            fi
+            sleep 1
+          done
+
+          if [ "${READY:-0}" -ne 1 ]; then
+            echo "cloudflared tunnel did not become ready"
+            cat /tmp/cloudflared.log || true
+            exit 1
+          fi
+
+          ssh -p "${TUNNEL_PORT}" -o ConnectTimeout=30 -o StrictHostKeyChecking=accept-new "${SSH_USER}@127.0.0.1" "set -euo pipefail; \
             if [ ! -d '${DEPLOY_PATH}/.git' ]; then \
               mkdir -p '${DEPLOY_PATH}'; \
               git clone '${REPO_URL}' '${DEPLOY_PATH}'; \
