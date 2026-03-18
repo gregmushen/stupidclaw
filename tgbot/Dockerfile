@@ -1,10 +1,12 @@
 FROM python:3.11-slim
 
-WORKDIR /app
+WORKDIR /opt/tgbot
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY . /opt/tgbot
 
-CMD ["python", "bot.py"]
+ENV PYTHONPATH=/opt
+
+CMD ["python", "-m", "tgbot.bot"]
