@@ -66,6 +66,45 @@ class TestCreateIssue:
         assert variables["input"]["title"] == "Short title"
         assert variables["input"]["description"] == "Short title"
 
+    def test_create_issue_uploads_attachments_and_returns_uploaded_metadata(self):
+        """create_issue should upload each attachment and return uploaded attachment records."""
+        team_id = "team-uuid-123"
+        mock_response = {
+            "issueCreate": {
+                "success": True,
+                "issue": {
+                    "id": "issue-uuid-abc",
+                    "identifier": "STU-42",
+                },
+            }
+        }
+
+        with patch.dict(os.environ, {"LINEAR_API_KEY": "lin_test_key", "LINEAR_TEAM_ID": team_id}):
+            with patch("tgbot.linear_api._graphql", return_value=mock_response):
+                with patch(
+                    "tgbot.linear_api.upload_attachment",
+                    side_effect=[
+                        {"id": "att-1", "url": "https://cdn.linear.app/assets/1.jpg"},
+                        {"id": "att-2", "url": "https://cdn.linear.app/assets/2.jpg"},
+                    ],
+                ) as mock_upload:
+                    from tgbot.linear_api import create_issue
+
+                    result = create_issue(
+                        title="Photo issue",
+                        description="Photo issue",
+                        attachments=[
+                            {"filename": "photo_1.jpg", "data": b"one"},
+                            {"filename": "photo_2.jpg", "data": b"two"},
+                        ],
+                    )
+
+        assert mock_upload.call_count == 2
+        assert result["attachments"] == [
+            {"id": "att-1", "url": "https://cdn.linear.app/assets/1.jpg"},
+            {"id": "att-2", "url": "https://cdn.linear.app/assets/2.jpg"},
+        ]
+
 
 class TestUploadAttachment:
 

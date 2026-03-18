@@ -100,10 +100,22 @@ def create_issue(
     data = _graphql(mutation, variables)
     issue = data["issueCreate"]["issue"]
 
+    uploaded_attachments: list[dict] = []
+    for attachment in attachments or []:
+        filename = attachment.get("filename", "attachment.bin")
+        payload = attachment.get("data")
+        if payload is None:
+            logger.warning("Skipping attachment with missing data: %s", filename)
+            continue
+        try:
+            uploaded_attachments.append(upload_attachment(issue["id"], filename, payload))
+        except Exception as exc:  # pragma: no cover - defensive logging for runtime failures
+            logger.exception("Attachment upload failed for %s on issue %s: %s", filename, issue["identifier"], exc)
+
     return {
         "id": issue["id"],
         "identifier": issue["identifier"],
-        "attachments": attachments or [],
+        "attachments": uploaded_attachments,
     }
 
 
