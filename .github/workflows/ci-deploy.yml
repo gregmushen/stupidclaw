@@ -100,6 +100,12 @@ jobs:
           fi
 
           REMOTE_CMD="set -euo pipefail; \
+            HOSTNAME_VALUE=\$(hostname); \
+            echo Deploy host: \${HOSTNAME_VALUE}; \
+            if [ \"\${HOSTNAME_VALUE}\" != 'garageband' ]; then \
+              echo 'Refusing deploy: expected host garageband.'; \
+              exit 1; \
+            fi; \
             if [ ! -d '${DEPLOY_PATH}/.git' ]; then \
               mkdir -p '${DEPLOY_PATH}'; \
               git clone '${REPO_URL}' '${DEPLOY_PATH}'; \
