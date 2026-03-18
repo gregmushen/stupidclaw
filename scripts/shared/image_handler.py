@@ -1,4 +1,6 @@
 import base64
+import os
+from urllib.parse import urlparse
 
 import httpx
 
@@ -9,6 +11,15 @@ MAX_IMAGE_SIZE = 20 * 1024 * 1024
 def _attachment_type_hint(attachment: dict) -> str:
     metadata = attachment.get("metadata") or {}
     return (metadata.get("mimeType") or "").strip().lower()
+
+
+def _request_headers(url: str) -> dict | None:
+    host = (urlparse(url).hostname or "").lower()
+    if host.endswith("linear.app"):
+        api_key = os.environ.get("LINEAR_API_KEY")
+        if api_key:
+            return {"Authorization": api_key}
+    return None
 
 
 def download_attachments(attachments: list[dict]) -> list[dict]:
@@ -23,7 +34,12 @@ def download_attachments(attachments: list[dict]) -> list[dict]:
             continue
 
         try:
-            response = httpx.get(url, timeout=30, follow_redirects=True)
+            response = httpx.get(
+                url,
+                timeout=30,
+                follow_redirects=True,
+                headers=_request_headers(url),
+            )
             response.raise_for_status()
         except Exception:
             continue

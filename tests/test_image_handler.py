@@ -43,3 +43,21 @@ def test_failed_download_skip(mock_get):
     mock_get.side_effect = Exception("connection error")
     result = download_attachments([{"url": "https://cdn.example.com/fail.jpg"}])
     assert result == []
+
+
+@patch("shared.image_handler.httpx.get")
+def test_linear_url_uses_api_key_header(mock_get, monkeypatch):
+    monkeypatch.setenv("LINEAR_API_KEY", "lin_api_test")
+    mock_get.return_value = _mock_response(b"fake-image")
+    download_attachments([{"url": "https://uploads.linear.app/path/file.jpg"}])
+    kwargs = mock_get.call_args.kwargs
+    assert kwargs["headers"] == {"Authorization": "lin_api_test"}
+
+
+@patch("shared.image_handler.httpx.get")
+def test_non_linear_url_does_not_send_api_key(mock_get, monkeypatch):
+    monkeypatch.setenv("LINEAR_API_KEY", "lin_api_test")
+    mock_get.return_value = _mock_response(b"fake-image")
+    download_attachments([{"url": "https://cdn.example.com/file.jpg"}])
+    kwargs = mock_get.call_args.kwargs
+    assert kwargs["headers"] is None
