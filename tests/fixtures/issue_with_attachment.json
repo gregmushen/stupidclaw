@@ -1,0 +1,23 @@
+{
+  "issues": [
+    {
+      "id": "att-1",
+      "title": "Unknown fluid reservoir is low",
+      "state": "backlog",
+      "description": "See attached image, identify the fluid and next steps.",
+      "labels": [],
+      "attachments": [
+        {
+          "id": "attachment-1",
+          "url": "https://cdn.example.com/reservoir.jpg",
+          "title": "reservoir.jpg",
+          "metadata": {
+            "mimeType": "image/jpeg"
+          }
+        }
+      ],
+      "comments": [],
+      "children": []
+    }
+  ]
+}

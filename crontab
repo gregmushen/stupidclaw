@@ -1,0 +1,4 @@
+# StupidClaw pipeline — runs every 5 minutes
+# Env vars are injected by Docker via env_file
+*/5 * * * * cd /app && /usr/local/bin/python scripts/run_pipeline.py >> /var/log/stupidclaw/pipeline.log 2>&1
+# Required: empty newline at end of crontab file

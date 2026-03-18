@@ -1,0 +1,23 @@
+{
+  "issues": [
+    {
+      "id": "blocked-1",
+      "title": "Fix the thing in the garage",
+      "state": "blocked",
+      "description": "No clear object identified.",
+      "labels": [
+        "clarification"
+      ],
+      "attachments": [],
+      "comments": [
+        {
+          "body": "<!-- blocked -->\nNeed the exact component name."
+        },
+        {
+          "body": "It is the garage door opener rail."
+        }
+      ],
+      "children": []
+    }
+  ]
+}

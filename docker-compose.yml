@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  stupidclaw:
+    build: .
+    container_name: stupidclaw
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./profile.md:/app/profile.md:ro
+      - stupidclaw-data:/var/data/stupidclaw
+      - stupidclaw-logs:/var/log/stupidclaw
+
+volumes:
+  stupidclaw-data:
+  stupidclaw-logs:

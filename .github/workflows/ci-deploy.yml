@@ -1,0 +1,70 @@
+name: CI and Deploy
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+jobs:
+  test:
+    name: Run Full Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Run tests
+        run: pytest tests/ -v
+
+  deploy:
+    name: Deploy to Garageband Server
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.GARAGEBAND_SSH_KEY }}
+          SSH_HOST: ${{ secrets.GARAGEBAND_HOST }}
+          SSH_PORT: ${{ secrets.GARAGEBAND_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf "%s\n" "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          PORT="${SSH_PORT:-22}"
+          ssh-keyscan -p "$PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Deploy
+        env:
+          SSH_HOST: ${{ secrets.GARAGEBAND_HOST }}
+          SSH_PORT: ${{ secrets.GARAGEBAND_SSH_PORT }}
+          SSH_USER: ${{ secrets.GARAGEBAND_USER }}
+          DEPLOY_PATH: ${{ secrets.GARAGEBAND_DEPLOY_PATH }}
+          REPO_URL: https://github.com/${{ github.repository }}.git
+        run: |
+          set -euo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -p "$PORT" "${SSH_USER}@${SSH_HOST}" "set -euo pipefail; \
+            if [ ! -d '${DEPLOY_PATH}/.git' ]; then \
+              mkdir -p '${DEPLOY_PATH}'; \
+              git clone '${REPO_URL}' '${DEPLOY_PATH}'; \
+            fi; \
+            cd '${DEPLOY_PATH}'; \
+            git fetch origin master; \
+            git checkout master; \
+            git reset --hard origin/master; \
+            docker compose up -d --build"

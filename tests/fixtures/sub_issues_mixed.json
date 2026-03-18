@@ -1,0 +1,46 @@
+{
+  "issues": [
+    {
+      "id": "parent-1",
+      "title": "Fix dryer not heating",
+      "state": "planning_complete",
+      "description": "Dryer tumbles but no heat output.",
+      "labels": [],
+      "attachments": [],
+      "comments": [
+        {
+          "body": "<!-- triage-result -->\nMaintenance issue."
+        }
+      ],
+      "children": [
+        {
+          "id": "sub-1",
+          "title": "Research common causes",
+          "state": "done",
+          "labels": [
+            "agent-task"
+          ],
+          "sortOrder": 1.0
+        },
+        {
+          "id": "sub-2",
+          "title": "Check thermal fuse",
+          "state": "backlog",
+          "labels": [
+            "agent-task"
+          ],
+          "sortOrder": 2.0
+        },
+        {
+          "id": "sub-3",
+          "title": "Order replacement part",
+          "state": "todo",
+          "labels": [
+            "human-task"
+          ],
+          "sortOrder": 3.0
+        }
+      ]
+    }
+  ]
+}
