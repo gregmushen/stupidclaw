@@ -249,3 +249,35 @@ def test_blocked_reentry_backlog_to_blocked_to_triaged(mock_linear, monkeypatch)
     mock_linear.assert_issue_state("parent-7", "triaged")
     mock_linear.assert_comment_contains("parent-7", "<!-- blocked -->")
     mock_linear.assert_comment_contains("parent-7", "<!-- triage-result -->")
+
+
+def test_triage_includes_images_in_claude_message(mock_linear, monkeypatch):
+    monkeypatch.setattr(stage1_triage, "graphql", mock_linear.graphql)
+    mock_linear.seed_issue(
+        id="parent-8",
+        title="Identify this animal",
+        state="backlog",
+        description="From attached image",
+        attachments=[{"url": "https://uploads.linear.app/fake.jpg", "metadata": {"mimeType": "image/jpeg"}}],
+    )
+
+    monkeypatch.setattr(
+        stage1_triage,
+        "download_attachments",
+        lambda _: [{"media_type": "image/jpeg", "data": "ZmFrZQ=="}],
+    )
+
+    captured = {}
+
+    def _mock_call_claude(**kwargs):
+        captured["messages"] = kwargs["messages"]
+        return _make_response(
+            '{"task_type":"research","complexity":"low","priority":3,"blocked":false,"block_reason":"","confidence":0.9,"notes":"image processed"}'
+        )
+
+    monkeypatch.setattr(stage1_triage, "call_claude", _mock_call_claude)
+
+    processed = stage1_triage.run(max_iterations=1)
+    assert processed == 1
+    assert captured["messages"][0]["content"][0]["type"] == "image"
+    assert captured["messages"][0]["content"][1]["type"] == "text"

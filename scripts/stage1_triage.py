@@ -4,9 +4,10 @@ import re
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from shared.claude_client import call_claude
+from shared.claude_client import build_user_message, call_claude
 from shared.comment_markers import write_marker_comment
 from shared.config import get_labels, get_states, get_stale_blocked_hours
+from shared.image_handler import download_attachments
 from shared.linear_client import graphql
 from shared.logging_config import setup_logging
 
@@ -254,7 +255,11 @@ def run(max_iterations: int = 1) -> int:
         for issue in issues:
             human_answer = extract_human_answer(issue.get("comments", {}).get("nodes", []))
             user_input = build_triage_input(issue, human_answer)
-            response = call_claude(system=prompt, messages=[{"role": "user", "content": user_input}])
+            images = download_attachments(issue.get("attachments", {}).get("nodes", []))
+            response = call_claude(
+                system=prompt,
+                messages=[build_user_message(user_input, images=images)],
+            )
             text = response.content[0].text
             triage = parse_triage_response(text)
             _apply_triage(issue, triage, states, labels)
