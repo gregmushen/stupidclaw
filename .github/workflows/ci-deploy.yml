@@ -36,16 +36,13 @@ jobs:
       - name: Configure SSH
         env:
           SSH_KEY: ${{ secrets.GARAGEBAND_SSH_KEY }}
-          SSH_HOST: ${{ secrets.GARAGEBAND_HOST }}
-          SSH_PORT: ${{ secrets.GARAGEBAND_SSH_PORT }}
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           printf "%s\n" "$SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          PORT="${SSH_PORT:-22}"
-          ssh-keyscan -p "$PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          touch ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
       - name: Deploy
@@ -58,7 +55,7 @@ jobs:
         run: |
           set -euo pipefail
           PORT="${SSH_PORT:-22}"
-          ssh -p "$PORT" "${SSH_USER}@${SSH_HOST}" "set -euo pipefail; \
+          ssh -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new -p "$PORT" "${SSH_USER}@${SSH_HOST}" "set -euo pipefail; \
             if [ ! -d '${DEPLOY_PATH}/.git' ]; then \
               mkdir -p '${DEPLOY_PATH}'; \
               git clone '${REPO_URL}' '${DEPLOY_PATH}'; \
