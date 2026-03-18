@@ -108,10 +108,10 @@ jobs:
             git fetch origin main; \
             git checkout main; \
             git reset --hard origin/main; \
-            if command -v docker-compose >/dev/null 2>&1; then \
-              docker-compose up -d --build; \
-            else \
+            if docker compose version >/dev/null 2>&1; then \
               docker compose up -d --build; \
+            else \
+              docker-compose up -d --build; \
             fi"
 
           for attempt in 1 2 3 4 5; do
