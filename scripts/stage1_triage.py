@@ -76,9 +76,10 @@ def parse_triage_response(text: str) -> dict[str, Any]:
 def build_triage_input(issue: dict, human_answer: str | None = None) -> str:
     attachments = issue.get("attachments", {}).get("nodes", [])
     attachment_lines = [f"- {att.get('title') or att.get('url', '')}" for att in attachments]
+    description = (issue.get("description") or "").strip()
     parts = [
         f"Title: {issue.get('title', '').strip()}",
-        f"Description:\n{issue.get('description', '').strip()}",
+        f"Description:\n{description}",
         "Attachments:",
     ]
     parts.extend(attachment_lines or ["- none"])
