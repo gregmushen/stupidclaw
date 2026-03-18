@@ -67,6 +67,8 @@ jobs:
           EXPECTED_CF_SECRET_SHA="b820470bd5fd2647ab011ddd35d2de9a0a900a39771fbe390dd2a82791655009"
           ACTUAL_CF_ID_SHA="$(printf '%s' "${CF_ACCESS_CLIENT_ID}" | sha256sum | awk '{print $1}')"
           ACTUAL_CF_SECRET_SHA="$(printf '%s' "${CF_ACCESS_CLIENT_SECRET}" | sha256sum | awk '{print $1}')"
+          echo "CF_ID_SHA=${ACTUAL_CF_ID_SHA}"
+          echo "CF_SECRET_SHA=${ACTUAL_CF_SECRET_SHA}"
 
           if [ "${ACTUAL_CF_ID_SHA}" != "${EXPECTED_CF_ID_SHA}" ] || [ "${ACTUAL_CF_SECRET_SHA}" != "${EXPECTED_CF_SECRET_SHA}" ]; then
             echo "Cloudflare secret hash mismatch in GitHub Actions."
