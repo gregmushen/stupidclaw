@@ -33,7 +33,7 @@ def write_marker_comment(issue_id: str, marker_key: str, content: str) -> str:
     body = f"{marker}\n\n{content}"
     data = graphql(
         """
-        mutation($id: ID!, $body: String!) {
+        mutation($id: String!, $body: String!) {
           commentCreate(input: { issueId: $id, body: $body }) {
             success
             comment { id }

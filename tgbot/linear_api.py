@@ -223,7 +223,7 @@ def update_issue_state(issue_id: str, state_name: str) -> dict:
         raise EnvironmentError(f"{env_key} is required for state '{state_name}'")
 
     mutation = """
-    mutation IssueUpdate($id: ID!, $input: IssueUpdateInput!) {
+    mutation IssueUpdate($id: String!, $input: IssueUpdateInput!) {
         issueUpdate(id: $id, input: $input) {
             success
             issue {

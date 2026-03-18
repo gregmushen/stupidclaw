@@ -190,7 +190,7 @@ def _list_active_agent_subtasks(state_id: str, agent_label_id: str) -> list[dict
 def _get_parent_with_children(parent_id: str) -> dict:
     data = graphql(
         """
-        query($id: ID!) {
+        query($id: String!) {
           issue(id: $id) {
             id
             identifier
@@ -259,7 +259,7 @@ def run(max_iterations: int = 1) -> int:
             if parsed["result"] == "completed":
                 graphql(
                     """
-                    mutation($issueId: ID!, $stateId: ID!) {
+                    mutation($issueId: String!, $stateId: String!) {
                       issueUpdate(id: $issueId, input: { stateId: $stateId }) { success }
                     }
                     """,
@@ -274,7 +274,7 @@ def run(max_iterations: int = 1) -> int:
                 if next_sibling:
                     graphql(
                         """
-                        mutation($issueId: ID!, $stateId: ID!) {
+                        mutation($issueId: String!, $stateId: String!) {
                           issueUpdate(id: $issueId, input: { stateId: $stateId }) { success }
                         }
                         """,
@@ -285,7 +285,7 @@ def run(max_iterations: int = 1) -> int:
                     parent_state_key = determine_parent_state(refreshed_children)
                     graphql(
                         """
-                        mutation($issueId: ID!, $stateId: ID!) {
+                        mutation($issueId: String!, $stateId: String!) {
                           issueUpdate(id: $issueId, input: { stateId: $stateId }) { success }
                         }
                         """,
@@ -321,7 +321,7 @@ def run(max_iterations: int = 1) -> int:
 
                 graphql(
                     """
-                    mutation($issueId: ID!, $stateId: ID!, $labelIds: [ID!]) {
+                    mutation($issueId: String!, $stateId: String!, $labelIds: [String!]) {
                       issueUpdate(id: $issueId, input: { stateId: $stateId, labelIds: $labelIds }) { success }
                     }
                     """,

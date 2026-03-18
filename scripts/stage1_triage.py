@@ -175,7 +175,7 @@ def _requeue_blocked_issues(states: dict, logger) -> int:
             continue
         graphql(
             """
-            mutation($issueId: ID!, $stateId: ID!) {
+            mutation($issueId: String!, $stateId: String!) {
               issueUpdate(id: $issueId, input: { stateId: $stateId }) { success }
             }
             """,
@@ -197,7 +197,7 @@ def _apply_triage(issue: dict, triage: dict, states: dict, labels: dict) -> None
     if triage["blocked"]:
         graphql(
             """
-            mutation($issueId: ID!, $stateId: ID!, $labelIds: [ID!]) {
+            mutation($issueId: String!, $stateId: String!, $labelIds: [String!]) {
               issueUpdate(id: $issueId, input: { stateId: $stateId, labelIds: $labelIds }) { success }
             }
             """,
@@ -222,7 +222,7 @@ def _apply_triage(issue: dict, triage: dict, states: dict, labels: dict) -> None
 
     graphql(
         """
-        mutation($issueId: ID!, $stateId: ID!, $labelIds: [ID!]) {
+        mutation($issueId: String!, $stateId: String!, $labelIds: [String!]) {
           issueUpdate(id: $issueId, input: { stateId: $stateId, labelIds: $labelIds }) { success }
         }
         """,

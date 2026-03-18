@@ -98,10 +98,10 @@ def _create_subtasks(parent_issue: dict, tasks: list[dict[str, str]], labels: di
             mutation(
               $title: String!,
               $description: String!,
-              $parentId: ID!,
-              $labelIds: [ID!],
+              $parentId: String!,
+              $labelIds: [String!],
               $sortOrder: Float!,
-              $stateId: ID!
+              $stateId: String!
             ) {
               issueCreate(
                 input: {
@@ -147,7 +147,7 @@ def run(max_iterations: int = 1) -> int:
             _create_subtasks(issue, tasks, labels, states)
             graphql(
                 """
-                mutation($issueId: ID!, $stateId: ID!) {
+                mutation($issueId: String!, $stateId: String!) {
                   issueUpdate(id: $issueId, input: { stateId: $stateId }) { success }
                 }
                 """,
