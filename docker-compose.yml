@@ -1,4 +1,5 @@
 version: "3.8"
+
 services:
   stupidclaw:
     build: .
@@ -9,6 +10,16 @@ services:
       - ./profile.md:/app/profile.md:ro
       - stupidclaw-data:/var/data/stupidclaw
       - stupidclaw-logs:/var/log/stupidclaw
+    depends_on:
+      - telegram-bot
+
+  telegram-bot:
+    build: ./tgbot
+    container_name: stupidclaw-telegram
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8080:8080"
 
 volumes:
   stupidclaw-data:

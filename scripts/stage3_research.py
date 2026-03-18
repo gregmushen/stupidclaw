@@ -296,6 +296,23 @@ def run(max_iterations: int = 1) -> int:
                         "summary",
                         build_rollup_summary(refreshed_parent, refreshed_children),
                     )
+                    try:
+                        from shared.telegram_notify import notify_completed
+                        human_remaining = sum(
+                            1 for c in refreshed_children
+                            if c["state"]["name"].lower() == "todo"
+                            and any(l["name"] == "human-task" for l in c.get("labels", {}).get("nodes", []))
+                        )
+                        notify_completed(
+                            issue_id=refreshed_parent["id"],
+                            identifier=refreshed_parent.get("identifier", ""),
+                            title=refreshed_parent.get("title", ""),
+                            state=parent_state_key,
+                            human_tasks_remaining=human_remaining,
+                            link=f"https://linear.app/gre/issue/{refreshed_parent.get('identifier', '')}",
+                        )
+                    except Exception as e:
+                        logger.warning("Telegram completed notification failed: %s", e)
 
             elif parsed["result"] in {"blocked", "needs_human", "scope_change"}:
                 label_ids = [labels["clarification"]] if parsed["result"] == "needs_human" else []
@@ -316,6 +333,16 @@ def run(max_iterations: int = 1) -> int:
                 )
                 marker = "blocked" if parsed["result"] != "scope_change" else "summary"
                 write_marker_comment(task["id"], marker, parsed["details"] or parsed["summary"] or parsed["result"])
+                try:
+                    from shared.telegram_notify import notify_blocked
+                    notify_blocked(
+                        issue_id=task["id"],
+                        identifier=task.get("identifier", ""),
+                        title=task.get("title", ""),
+                        blocked_message=parsed["details"] or parsed["summary"] or "",
+                    )
+                except Exception as e:
+                    logger.warning("Telegram blocked notification failed: %s", e)
 
             processed += 1
             logger.info("Processed research for %s", task.get("identifier", task["id"]))

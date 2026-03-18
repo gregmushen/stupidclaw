@@ -207,6 +207,16 @@ def _apply_triage(issue: dict, triage: dict, states: dict, labels: dict) -> None
             },
         )
         write_marker_comment(issue["id"], "blocked", triage["block_reason"])
+        try:
+            from shared.telegram_notify import notify_blocked
+            notify_blocked(
+                issue_id=issue["id"],
+                identifier=issue.get("identifier", ""),
+                title=issue.get("title", ""),
+                blocked_message=triage["block_reason"],
+            )
+        except Exception as e:
+            logger.warning("Telegram blocked notification failed: %s", e)
         return
 
     graphql(
