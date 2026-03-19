@@ -15,6 +15,24 @@ logger = logging.getLogger("stupidclaw.telegram.notify")
 
 # Set by bot.py during initialization
 _bot = None
+_TELEGRAM_TEXT_LIMIT = 4000
+
+
+def _chunk_text(text: str, limit: int = _TELEGRAM_TEXT_LIMIT) -> list[str]:
+    if len(text) <= limit:
+        return [text]
+
+    chunks: list[str] = []
+    remaining = text
+    while len(remaining) > limit:
+        split_at = remaining.rfind("\n", 0, limit)
+        if split_at <= 0:
+            split_at = limit
+        chunks.append(remaining[:split_at].rstrip())
+        remaining = remaining[split_at:].lstrip()
+    if remaining:
+        chunks.append(remaining)
+    return chunks
 
 
 def set_bot(bot) -> None:
@@ -65,19 +83,20 @@ async def handle_notify(request: web.Request) -> web.Response:
             text = f"{identifier} complete:\n{title}"
 
         if answer:
-            excerpt = answer[:1400]
-            if len(answer) > 1400:
-                excerpt += "..."
-            text += f"\n\nAnswer:\n{excerpt}"
+            text += f"\n\nAnswer:\n{answer}"
 
         if link:
             text += f"\n{link}"
 
         try:
-            await _bot.send_message(
-                chat_id=int(get_chat_id()),
-                text=text,
-            )
+            chunks = _chunk_text(text)
+            total = len(chunks)
+            for idx, chunk in enumerate(chunks, start=1):
+                prefix = f"[{idx}/{total}]\n" if total > 1 else ""
+                await _bot.send_message(
+                    chat_id=int(get_chat_id()),
+                    text=f"{prefix}{chunk}",
+                )
         except Exception as e:
             logger.error(f"Failed to send completed notification: {e}")
             return web.Response(status=500, text=str(e))

@@ -76,6 +76,28 @@ class TestNotifyServer:
         assert "https://linear.app/gregmushen/issue/STU-42" in call_kwargs["text"]
 
     @pytest.mark.asyncio
+    async def test_completed_notification_chunks_long_answer(self, notify_client):
+        """Long completion payload should be sent as multiple Telegram messages."""
+        client, mock_bot = notify_client
+
+        payload = {
+            "type": "completed",
+            "issue_id": "abc-123",
+            "identifier": "STU-99",
+            "title": "Very long answer test",
+            "state": "done",
+            "human_tasks_remaining": 0,
+            "link": "https://linear.app/gregmushen/issue/STU-99",
+            "answer": "A" * 10000,
+        }
+        with patch("tgbot.server.notify.get_chat_id", return_value="12345"):
+            resp = await client.post("/notify", json=payload)
+        assert resp.status == 200
+        assert mock_bot.send_message.call_count >= 3
+        first_text = mock_bot.send_message.call_args_list[0][1]["text"]
+        assert first_text.startswith("[1/")
+
+    @pytest.mark.asyncio
     async def test_invalid_json_returns_400(self, notify_client):
         """POST non-JSON body -> 400 response."""
         client, _ = notify_client
