@@ -120,20 +120,22 @@ def check_predecessors(children: list[dict], current_id: str) -> bool:
 
 
 def find_next_agent_sibling(children: list[dict], current_id: str) -> dict | None:
-    ordered = sorted(children, key=lambda c: float(c.get("sortOrder", 0.0)), reverse=True)
-    current = next((c for c in ordered if c["id"] == current_id), None)
-    if current is None:
+    if not any(child.get("id") == current_id for child in children):
         return None
-    current_order = float(current.get("sortOrder", 0.0))
-    for child in ordered:
-        if float(child.get("sortOrder", 0.0)) >= current_order:
+    ready_states = {"todo", "backlog", "triaged", "planning_complete", "planning complete"}
+    candidates = []
+    for child in children:
+        if child.get("id") == current_id:
             continue
         if not _is_agent_task(child):
             continue
         state = str(child.get("state", {}).get("name", "")).strip().lower()
-        if state in {"todo", "backlog", "triaged", "planning_complete"}:
-            return child
-    return None
+        if state not in ready_states:
+            continue
+        candidates.append(child)
+    if not candidates:
+        return None
+    return sorted(candidates, key=lambda c: float(c.get("sortOrder", 0.0)), reverse=True)[0]
 
 
 def all_children_terminal(children: list[dict]) -> bool:
