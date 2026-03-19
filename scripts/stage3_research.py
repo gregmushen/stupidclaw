@@ -8,7 +8,7 @@ from shared.comment_markers import (
     get_all_marker_contents,
     write_marker_comment,
 )
-from shared.config import get_labels, get_linear_workspace_slug, get_states
+from shared.config import get_labels, get_states
 from shared.image_handler import download_attachments
 from shared.linear_client import graphql
 from shared.logging_config import setup_logging
@@ -195,6 +195,7 @@ def _get_parent_with_children(parent_id: str) -> dict:
           issue(id: $id) {
             id
             identifier
+            url
             title
             description
             attachments { nodes { id title url metadata } }
@@ -229,7 +230,6 @@ def run(max_iterations: int = 1) -> int:
     logger = setup_logging()
     states = get_states()
     labels = get_labels()
-    workspace_slug = get_linear_workspace_slug()
     prompt = _load_prompt()
 
     processed = 0
@@ -304,6 +304,13 @@ def run(max_iterations: int = 1) -> int:
                         "summary",
                         build_rollup_summary(refreshed_parent, refreshed_children),
                     )
+                    answer_text = ""
+                    for child in sorted(refreshed_children, key=lambda c: float(c.get("sortOrder", 0.0)), reverse=True):
+                        notes = get_all_marker_contents(child.get("comments", {}).get("nodes", []), "research")
+                        if notes:
+                            answer_text = notes[-1].split("\n", 1)[-1].strip()
+                            if answer_text:
+                                break
                     try:
                         from shared.telegram_notify import notify_completed
                         human_remaining = sum(
@@ -317,7 +324,8 @@ def run(max_iterations: int = 1) -> int:
                             title=refreshed_parent.get("title", ""),
                             state=parent_state_key,
                             human_tasks_remaining=human_remaining,
-                            link=f"https://linear.app/{workspace_slug}/issue/{refreshed_parent.get('identifier', '')}",
+                            link=refreshed_parent.get("url", ""),
+                            answer=answer_text,
                         )
                     except Exception as e:
                         logger.warning("Telegram completed notification failed: %s", e)

@@ -57,11 +57,18 @@ async def handle_notify(request: web.Request) -> web.Response:
         title = payload.get("title", "")
         human_remaining = payload.get("human_tasks_remaining", 0)
         link = payload.get("link", "")
+        answer = (payload.get("answer") or "").strip()
 
         if human_remaining and human_remaining > 0:
-            text = f"*{identifier} ready for review:*\n{title} — {human_remaining} human task{'s' if human_remaining > 1 else ''} remaining."
+            text = f"{identifier} ready for review:\n{title} — {human_remaining} human task{'s' if human_remaining > 1 else ''} remaining."
         else:
-            text = f"*{identifier} complete:*\n{title}"
+            text = f"{identifier} complete:\n{title}"
+
+        if answer:
+            excerpt = answer[:1400]
+            if len(answer) > 1400:
+                excerpt += "..."
+            text += f"\n\nAnswer:\n{excerpt}"
 
         if link:
             text += f"\n{link}"
@@ -70,7 +77,6 @@ async def handle_notify(request: web.Request) -> web.Response:
             await _bot.send_message(
                 chat_id=int(get_chat_id()),
                 text=text,
-                parse_mode="Markdown",
             )
         except Exception as e:
             logger.error(f"Failed to send completed notification: {e}")

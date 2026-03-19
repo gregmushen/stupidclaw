@@ -61,7 +61,8 @@ class TestNotifyServer:
             "title": "Replace windshield wipers",
             "state": "in_review",
             "human_tasks_remaining": 1,
-            "link": "https://linear.app/gre/issue/STU-42",
+            "link": "https://linear.app/gregmushen/issue/STU-42",
+            "answer": "Likely domestic shorthair. Feed high-protein indoor adult formula.",
         }
         with patch("tgbot.server.notify.get_chat_id", return_value="12345"):
             resp = await client.post("/notify", json=payload)
@@ -69,9 +70,10 @@ class TestNotifyServer:
 
         mock_bot.send_message.assert_called_once()
         call_kwargs = mock_bot.send_message.call_args[1]
-        assert "*STU-42 ready for review:*" in call_kwargs["text"]
+        assert "STU-42 ready for review:" in call_kwargs["text"]
         assert "1 human task remaining" in call_kwargs["text"]
-        assert "https://linear.app/gre/issue/STU-42" in call_kwargs["text"]
+        assert "Likely domestic shorthair" in call_kwargs["text"]
+        assert "https://linear.app/gregmushen/issue/STU-42" in call_kwargs["text"]
 
     @pytest.mark.asyncio
     async def test_invalid_json_returns_400(self, notify_client):

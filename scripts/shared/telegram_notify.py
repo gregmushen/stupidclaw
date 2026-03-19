@@ -67,6 +67,7 @@ def notify_completed(
     state: str,
     human_tasks_remaining: int,
     link: str,
+    answer: str = "",
 ) -> bool:
     """Notify the Telegram bot that a pipeline issue has completed agent work.
 
@@ -91,6 +92,7 @@ def notify_completed(
             "state": state,
             "human_tasks_remaining": human_tasks_remaining,
             "link": link,
+            "answer": answer,
         }
         response = httpx.post(
             f"{bot_url}/notify",
