@@ -17,6 +17,11 @@ PROMPT_PATH = os.path.join(os.path.dirname(__file__), "..", "prompts", "research
 TERMINAL_STATES = {"done", "blocked", "cancelled", "canceled"}
 
 
+def _is_agent_task(issue: dict) -> bool:
+    labels = [node.get("name", "") for node in issue.get("labels", {}).get("nodes", [])]
+    return "agent-task" in labels
+
+
 def _strip_fenced_json(text: str) -> str:
     match = re.search(r"```(?:json)?\s*(.*?)\s*```", text, flags=re.S | re.I)
     if match:
@@ -106,6 +111,8 @@ def check_predecessors(children: list[dict], current_id: str) -> bool:
     for child in ordered:
         if float(child.get("sortOrder", 0.0)) >= current_order:
             continue
+        if not _is_agent_task(child):
+            continue
         state = str(child.get("state", {}).get("name", "")).strip().lower()
         if state not in TERMINAL_STATES:
             return False
@@ -121,8 +128,7 @@ def find_next_agent_sibling(children: list[dict], current_id: str) -> dict | Non
     for child in ordered:
         if float(child.get("sortOrder", 0.0)) <= current_order:
             continue
-        labels = [node.get("name", "") for node in child.get("labels", {}).get("nodes", [])]
-        if "agent-task" not in labels:
+        if not _is_agent_task(child):
             continue
         state = str(child.get("state", {}).get("name", "")).strip().lower()
         if state in {"todo", "backlog", "triaged", "planning_complete"}:

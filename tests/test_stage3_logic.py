@@ -44,6 +44,14 @@ def test_check_predecessors_previous_todo_false():
     assert check_predecessors(children, "b") is False
 
 
+def test_check_predecessors_ignores_human_tasks_before_current():
+    children = [
+        _child("a", 1, "todo", ["human-task"]),
+        _child("b", 2, "in_progress", ["agent-task"]),
+    ]
+    assert check_predecessors(children, "b") is True
+
+
 def test_check_predecessors_missing_current_false():
     children = [_child("a", 1, "done", ["agent-task"])]
     assert check_predecessors(children, "missing") is False
