@@ -22,32 +22,32 @@ def test_check_predecessors_first_task_true():
 
 def test_check_predecessors_previous_done_true():
     children = [
-        _child("a", 1, "done", ["agent-task"]),
-        _child("b", 2, "in_progress", ["agent-task"]),
+        _child("a", 2, "done", ["agent-task"]),
+        _child("b", 1, "in_progress", ["agent-task"]),
     ]
     assert check_predecessors(children, "b") is True
 
 
 def test_check_predecessors_previous_blocked_true():
     children = [
-        _child("a", 1, "blocked", ["agent-task"]),
-        _child("b", 2, "in_progress", ["agent-task"]),
+        _child("a", 2, "blocked", ["agent-task"]),
+        _child("b", 1, "in_progress", ["agent-task"]),
     ]
     assert check_predecessors(children, "b") is True
 
 
 def test_check_predecessors_previous_todo_false():
     children = [
-        _child("a", 1, "todo", ["agent-task"]),
-        _child("b", 2, "in_progress", ["agent-task"]),
+        _child("a", 2, "todo", ["agent-task"]),
+        _child("b", 1, "in_progress", ["agent-task"]),
     ]
     assert check_predecessors(children, "b") is False
 
 
 def test_check_predecessors_ignores_human_tasks_before_current():
     children = [
-        _child("a", 1, "todo", ["human-task"]),
-        _child("b", 2, "in_progress", ["agent-task"]),
+        _child("a", 2, "todo", ["human-task"]),
+        _child("b", 1, "in_progress", ["agent-task"]),
     ]
     assert check_predecessors(children, "b") is True
 
@@ -59,34 +59,34 @@ def test_check_predecessors_missing_current_false():
 
 def test_find_next_agent_sibling_simple():
     children = [
-        _child("a", 1, "done", ["agent-task"]),
-        _child("b", 2, "todo", ["agent-task"]),
+        _child("a", 2, "done", ["agent-task"]),
+        _child("b", 1, "todo", ["agent-task"]),
     ]
     assert find_next_agent_sibling(children, "a")["id"] == "b"
 
 
 def test_find_next_agent_sibling_skips_human():
     children = [
-        _child("a", 1, "done", ["agent-task"]),
+        _child("a", 3, "done", ["agent-task"]),
         _child("b", 2, "todo", ["human-task"]),
-        _child("c", 3, "backlog", ["agent-task"]),
+        _child("c", 1, "backlog", ["agent-task"]),
     ]
     assert find_next_agent_sibling(children, "a")["id"] == "c"
 
 
 def test_find_next_agent_sibling_skips_terminal_agent():
     children = [
-        _child("a", 1, "done", ["agent-task"]),
+        _child("a", 3, "done", ["agent-task"]),
         _child("b", 2, "done", ["agent-task"]),
-        _child("c", 3, "todo", ["agent-task"]),
+        _child("c", 1, "todo", ["agent-task"]),
     ]
     assert find_next_agent_sibling(children, "a")["id"] == "c"
 
 
 def test_find_next_agent_sibling_none_when_absent():
     children = [
-        _child("a", 1, "done", ["agent-task"]),
-        _child("b", 2, "done", ["agent-task"]),
+        _child("a", 2, "done", ["agent-task"]),
+        _child("b", 1, "done", ["agent-task"]),
     ]
     assert find_next_agent_sibling(children, "a") is None
 
