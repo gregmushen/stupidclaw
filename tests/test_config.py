@@ -1,6 +1,6 @@
 import os
 import pytest
-from shared.config import get_states, get_labels, _env, get_daily_budget_cap
+from shared.config import get_states, get_labels, _env, get_daily_budget_cap, get_linear_workspace_slug
 
 
 class TestEnvHelper:
@@ -64,3 +64,13 @@ class TestGetStates:
 
         result2 = get_states()
         assert result2["backlog"] == "uuid-changed"
+
+
+class TestWorkspaceSlug:
+    def test_workspace_slug_defaults(self, monkeypatch):
+        monkeypatch.delenv("LINEAR_WORKSPACE_SLUG", raising=False)
+        assert get_linear_workspace_slug() == "stupidclaw"
+
+    def test_workspace_slug_from_env(self, monkeypatch):
+        monkeypatch.setenv("LINEAR_WORKSPACE_SLUG", "acme")
+        assert get_linear_workspace_slug() == "acme"

@@ -49,6 +49,9 @@ def get_linear_api_key() -> str:
 def get_linear_team_id() -> str:
     return _env("LINEAR_TEAM_ID")
 
+def get_linear_workspace_slug() -> str:
+    return _env("LINEAR_WORKSPACE_SLUG", "stupidclaw")
+
 def get_anthropic_api_key() -> str:
     return _env("ANTHROPIC_API_KEY")
 

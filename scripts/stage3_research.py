@@ -8,7 +8,7 @@ from shared.comment_markers import (
     get_all_marker_contents,
     write_marker_comment,
 )
-from shared.config import get_labels, get_states
+from shared.config import get_labels, get_linear_workspace_slug, get_states
 from shared.image_handler import download_attachments
 from shared.linear_client import graphql
 from shared.logging_config import setup_logging
@@ -229,6 +229,7 @@ def run(max_iterations: int = 1) -> int:
     logger = setup_logging()
     states = get_states()
     labels = get_labels()
+    workspace_slug = get_linear_workspace_slug()
     prompt = _load_prompt()
 
     processed = 0
@@ -316,7 +317,7 @@ def run(max_iterations: int = 1) -> int:
                             title=refreshed_parent.get("title", ""),
                             state=parent_state_key,
                             human_tasks_remaining=human_remaining,
-                            link=f"https://linear.app/gre/issue/{refreshed_parent.get('identifier', '')}",
+                            link=f"https://linear.app/{workspace_slug}/issue/{refreshed_parent.get('identifier', '')}",
                         )
                     except Exception as e:
                         logger.warning("Telegram completed notification failed: %s", e)
